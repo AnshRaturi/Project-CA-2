@@ -1,0 +1,15 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: api-rate-limiter
+  data:
+    redis:
+      host: redis-rate-limiter
+      port: 6379
+
+logging:
+  level:
+    root: INFO
+    com.example.backend: DEBUG
