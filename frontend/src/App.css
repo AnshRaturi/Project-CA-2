@@ -1,0 +1,104 @@
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+}
+
+.card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  width: 350px;
+  text-align: center;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.subtitle {
+  color: #555;
+  margin-bottom: 20px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.toggle {
+  background: transparent;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.status {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.progress-container {
+  width: 100%;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  margin-top: 15px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.limit-text {
+  font-size: 12px;
+  color: #555;
+}
+
+.footer {
+  font-size: 12px;
+  color: #777;
+  margin-top: 15px;
+}
+
+/* DARK MODE */
+.dark {
+  background: linear-gradient(135deg, #020617, #020617);
+}
+
+.dark .card {
+  background: #0f172a;
+  color: white;
+}
+
+.dark .subtitle,
+.dark .limit-text,
+.dark .footer {
+  color: #cbd5f5;
+}
