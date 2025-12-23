@@ -16,7 +16,7 @@ COPY --from=frontend-builder /app/frontend/build/ ./src/main/resources/static/
 RUN mvn clean package -DskipTests
 
 # Final stage
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:11-jre
 WORKDIR /app
 COPY --from=backend-builder /app/backend/target/*.jar app.jar
 EXPOSE 8080
