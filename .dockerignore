@@ -1,0 +1,13 @@
+**/node_modules
+**/target
+**/.git
+**/.gitignore
+**/README.md
+**/mvnw
+**/mvnw.cmd
+**/.mvn
+**/Dockerfile
+**/.dockerignore
+**/*.iml
+**/.idea
+**/*.log
