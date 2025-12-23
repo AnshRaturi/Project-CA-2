@@ -1,18 +1,19 @@
-FROM node:18-alpine
+# Development stage
+FROM node:16-alpine
 
 WORKDIR /app
 
+# Copy package files
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install
 
+# Copy the rest of the application
 COPY . .
 
-ENV REACT_APP_API_URL=http://localhost:8081
-
-RUN npm run build
-
-RUN npm install -g serve
-
+# Expose port 3000 for the development server
 EXPOSE 3000
 
-CMD ["serve", "-s", "build", "-l", "3000"]
+# Start the development server
+CMD ["npm", "start"]

@@ -1,97 +1,155 @@
 import React, { useState } from "react";
-import "./App.css";
-import { motion } from "framer-motion";
 import {
   LineChart,
   Line,
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  CartesianGrid
 } from "recharts";
-
-const LIMIT = 5;
+import { FiRefreshCw, FiCheckCircle, FiAlertCircle, FiZap } from "react-icons/fi";
+import "./App.css";
 
 function App() {
-  const [message, setMessage] = useState("");
-  const [count, setCount] = useState(0);
+  const [status, setStatus] = useState("Idle");
   const [used, setUsed] = useState(0);
-  const [dark, setDark] = useState(false);
-  const [responseTimes, setResponseTimes] = useState([]);
+  const [times, setTimes] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const LIMIT = 5;
 
   const callApi = async () => {
+    const start = performance.now();
+    setStatus("Loading...");
+    setIsLoading(true);
+
     try {
-      const start = performance.now();
-
-      const res = await fetch("http://localhost:8081/api/test");
-      const text = await res.text();
-
+      const res = await fetch("http://localhost:8083/api/test", {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        mode: 'cors'
+      });
+      
       const end = performance.now();
-      const duration = Math.round(end - start);
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Error response:', {
+          status: res.status,
+          statusText: res.statusText,
+          headers: Object.fromEntries(res.headers.entries()),
+          body: errorText
+        });
+        
+        if (res.status === 429) {
+          setStatus("Rate limit exceeded");
+          setUsed(LIMIT);
+          return;
+        }
+        throw new Error(`HTTP error! status: ${res.status}, body: ${errorText}`);
+      }
 
-      setMessage(text);
-      setCount((prev) => prev + 1);
-      setUsed((prev) => Math.min(prev + 1, LIMIT));
-
-      setResponseTimes((prev) => [
+      const data = await res.text();
+      console.log("Response data:", data); // Debug log
+      
+      setTimes(prev => [
         ...prev,
-        { time: new Date().toLocaleTimeString(), ms: duration }
+        { time: new Date().toLocaleTimeString(), ms: Math.round(end - start) }
       ]);
-    } catch (err) {
-      setMessage("Backend not reachable");
+      setStatus("Request successful!");
+      setUsed(prev => Math.min(prev + 1, LIMIT));
+    } catch (error) {
+      console.error("Error calling API:", error);
+      setStatus("Error: " + (error.message || "Could not connect to backend"));
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className={`container ${dark ? "dark" : ""}`}>
-      <motion.div
-        className="card"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h1>🚦 API Rate Limiter Demo</h1>
-        <p className="subtitle">Spring Boot + Redis + Docker</p>
-
-        <button className="toggle" onClick={() => setDark(!dark)}>
-          {dark ? "☀ Light Mode" : "🌙 Dark Mode"}
-        </button>
-
-        <button onClick={callApi}>Call API</button>
-
-        {message && (
-          <div className={`status ${message.includes("Too") ? "error" : "success"}`}>
-            {message}
-          </div>
-        )}
-
-        {/* Progress Bar */}
-        <div className="progress-container">
-          <div
-            className="progress-bar"
-            style={{
-              width: `${(used / LIMIT) * 100}%`,
-              background: used >= LIMIT ? "#dc2626" : "#22c55e"
-            }}
-          />
+    <div className="app">
+      <header className="header">
+        <div className="logo">
+          <FiZap className="logo-icon" />
+          <h1>API Rate Limiter</h1>
         </div>
-        <p className="limit-text">{used}/{LIMIT} requests used</p>
+        <p className="subtitle">Spring Boot + React</p>
+      </header>
 
-        <h3>Total Requests: {count}</h3>
+      <main className="main-content">
+        <div className="card">
+          <div className="api-controls">
+            <button 
+              onClick={callApi} 
+              disabled={isLoading}
+              className="api-button"
+            >
+              {isLoading ? (
+                <><FiRefreshCw className="spin" /> Loading...</>
+              ) : (
+                'Call API Endpoint'
+              )}
+            </button>
+            <div className={`status ${status.includes('Error') ? 'error' : 'success'}`}>
+              {status.includes('success') && <FiCheckCircle className="status-icon" />}
+              {status.includes('Error') && <FiAlertCircle className="status-icon" />}
+              {status}
+            </div>
+          </div>
 
-        {/* Response Time Graph */}
-        <h4>API Response Time (ms)</h4>
-        <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={responseTimes}>
-            <XAxis dataKey="time" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="ms" stroke="#f97316" />
-          </LineChart>
-        </ResponsiveContainer>
+          <div className="usage-container">
+            <div className="usage-header">
+              <span>API Usage</span>
+              <span>{used} of {LIMIT} requests</span>
+            </div>
+            <div className="progress-bar">
+              <div 
+                className="progress-fill" 
+                style={{ width: `${(used / LIMIT) * 100}%` }}
+              ></div>
+            </div>
+          </div>
 
-        <p className="footer">Rate limiting using Redis</p>
-      </motion.div>
+          <div className="chart-container">
+            <h3>Response Time History</h3>
+            {times.length > 0 ? (
+              <div className="chart">
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={times}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="time" 
+                      tick={{ fontSize: 12 }}
+                    />
+                    <YAxis 
+                      label={{ value: 'ms', angle: -90, position: 'insideLeft' }}
+                      tick={{ fontSize: 12 }}
+                    />
+                    <Tooltip />
+                    <Line 
+                      type="monotone" 
+                      dataKey="ms" 
+                      stroke="#3b82f6" 
+                      strokeWidth={2}
+                      dot={{ r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="no-data">No data yet. Make some API calls!</div>
+            )}
+          </div>
+        </div>
+      </main>
+
+      <footer className="footer">
+        <p>API Rate Limiter Demo • {new Date().getFullYear()}</p>
+      </footer>
     </div>
   );
 }

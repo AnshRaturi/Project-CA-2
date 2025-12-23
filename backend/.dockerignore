@@ -1,0 +1,19 @@
+# Create backend/.dockerignore
+echo "target/
+!target/*.jar
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+**/*.sh
+**/*.iml
+**/.git
+**/.gitignore
+**/.project
+**/.settings
+**/.classpath
+**/.idea
+**/*.log
+**/logs
+**/*.jar.original
+**/Dockerfile
+**/docker-compose.yml
+**/README.md" > backend/.dockerignore
