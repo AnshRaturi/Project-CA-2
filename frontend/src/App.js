@@ -24,7 +24,7 @@ function App() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8083/api/test", {
+      const res = await fetch("https://project-ca-2.onrender.com/api/test", {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
